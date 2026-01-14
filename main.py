@@ -1,15 +1,11 @@
 import pygame
-from pygame_managers import AudioManager, DataManager, TimeManager, LanguagesManager
+import pygame_managers as pm
 
 
 class Main:
     def __init__(self):
-        self.managers = {
-            "audio": AudioManager(),
-            "data": DataManager(),
-            "time": TimeManager(),
-            "language": LanguagesManager(),
-        }
+        pm.time.set_fps_limit(50)
+        print("ok")
 
 
 if __name__ == '__main__':

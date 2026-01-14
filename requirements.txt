@@ -1,0 +1,2 @@
+pygame
+pygame_managers @ git+https://github.com/WhiteWolf45380/pygame_managers.git
