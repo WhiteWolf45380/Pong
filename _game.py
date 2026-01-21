@@ -28,7 +28,7 @@ class Game:
         Actualisation de la frame
         """
         # fond du jeu
-        pm.screen.fill((0, 0, 0))
+        pm.screen.fill((0, 0, 15))
 
         # balle
         self.ball.update()

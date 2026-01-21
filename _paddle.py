@@ -6,7 +6,7 @@ class Paddle:
     """
     Raquette d'une joueur
     """
-    def __init__(self, player: int=1, width: int=10, height: int=30, offset_x: int= 50, color: tuple[int]=(255, 255, 255)):
+    def __init__(self, player: int=1, width: int=15, height: int=80, offset_x: int= 50, color: tuple[int]=(255, 255, 255)):
         # profil
         self.player = player
         self.color = color
@@ -29,7 +29,7 @@ class Paddle:
         Actualisation de la frame
         """
         self.rect.center = (self.x, self.y)
-        pygame.draw.rect(pm.screen, self.color, self.rect)
+        pygame.draw.rect(pm.screen.surface, self.color, self.rect)
     
     def move_up(self):
         """
