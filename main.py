@@ -8,7 +8,7 @@ class Main:
     Jeu entier
     """
     def __init__(self):
-        pm.init()
+        pm.init(self.init)
 
     def init(self):
         self.game = Game().init()

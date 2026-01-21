@@ -43,7 +43,7 @@ class Game:
         if self.players == 2:
             self.paddles.append(Paddle(self.board_rect.width - offset, self.board_rect.height / 2, up=pygame.K_UP, down=pygame.K_DOWN))
         
-        pm.states.activate_exclusif("game")
+        pm.states.activate_exclusive("game")
             
         return self
 

@@ -1,2 +1,2 @@
 pygame
-pygame_manager @ git+https://github.com/WhiteWolf45380/Pygame-Manager.git
+https://github.com/WhiteWolf45380/Pygame-Manager/archive/refs/heads/main.zip
