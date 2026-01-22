@@ -25,8 +25,8 @@ class Paddle:
         self.down = down
 
         # handlers de déplacement
-        pm.inputs.add_listener(up, self.move_up)
-        pm.inputs.add_listener(down, self.move_down)
+        pm.inputs.add_listener(up, self.move_up, once=False)
+        pm.inputs.add_listener(down, self.move_down, once=False)
 
         # paramètres
         self.celerity = 10

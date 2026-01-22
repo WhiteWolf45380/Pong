@@ -12,7 +12,7 @@ class Main:
     def init(self):
         self.game = Game().init()
         pm.states.activate("game")
-        for i in range(99999):
+        for i in range(9999):
             print(i)
 
     def update(self):
