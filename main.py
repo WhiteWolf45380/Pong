@@ -18,7 +18,6 @@ class Main:
         Actualisation de la frame
         """
         pm.screen.fill((80, 80, 90))
-        pm.states.update()
 
 if __name__ == '__main__':
     main = Main()

@@ -11,7 +11,7 @@ class Ball:
     def __init__(self, radius: int=20, color: tuple[int]=(255, 255, 255)):
         # position initiale
         self.disabled_side = random.choice(("left", "right")) if pm.states["game"].game_mode != 1 else "right"
-        self.start_angle = (random.randint(20, 40) if self.disabled_side == "left" else random.randint(140, 160)) * random.choice((-1, 1))
+        self.start_angle = (random.randint(15, 35) if self.disabled_side == "left" else random.randint(145, 165)) * random.choice((-1, 1))
         self.start_angle_radians = math.radians(self.start_angle)
 
         # design
@@ -28,8 +28,8 @@ class Ball:
         self.d = pm.geometry.Vector(*self.vect_from_angle(self.start_angle_radians))
 
         # paramètres
-        self.celerity_min = 350
-        self.celerity_max = 2000
+        self.celerity_min = 700
+        self.celerity_max = 3000
         self.celerity = self.celerity_min
         self.celerity_variation_time = 300
 
@@ -41,6 +41,7 @@ class Ball:
         """
         Actualisation de la frame
         """
+        print(self.celerity)
         # trainée
         self.trail.append((self.x, self.y))
         while len(self.trail) > int(self.trail_limit * (pm.time.smoothfps / 60)):
