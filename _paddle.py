@@ -39,8 +39,8 @@ class Paddle:
 
     def draw(self):
         """Affichage"""
-        pygame.draw.rect(pm.states["game"].surface, self.color, self.rect, border_radius=5)
-        pygame.draw.rect(pm.states["game"].surface, (0, 0, 0), self.rect, 1, border_radius=5)
+        pygame.draw.rect(pm.states["game"].surface, self.color, self.rect, border_radius=10)
+        pygame.draw.rect(pm.states["game"].surface, (0, 0, 0), self.rect, 1, border_radius=10)
 
     def is_playing(self):
         """

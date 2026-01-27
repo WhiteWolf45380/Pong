@@ -11,27 +11,29 @@ class Ball:
     def __init__(self, radius: int=20, color: tuple[int]=(255, 255, 255)):
         # position initiale
         self.disabled_side = random.choice(("left", "right")) if pm.states["game"].game_mode != 1 else "right"
-        self.start_angle = (random.randint(15, 30) if self.disabled_side == "left" else random.randint(150, 165)) * random.choice((-1, 1))
+        self.start_angle = (random.randint(15, 35) if self.disabled_side == "left" else random.randint(145, 165)) * random.choice((-1, 1))
         self.start_angle_radians = math.radians(self.start_angle)
 
         # design
         self.color = color
         self.trail = []
-        self.trail_limit = 6
+        self.trail_limit = 8
 
         # taille
         self.radius = radius
 
-        # position (garder en float pour éviter le scintillement)
+        # position
         self.x = float(pm.states["game"].surface_width / 2)
         self.y = float(pm.states["game"].surface_height / 2)
         self.d = pm.geometry.Vector(*self.vect_from_angle(self.start_angle_radians))
 
         # paramètres
         self.celerity_min = 700
-        self.celerity_max = 3000
+        self.celerity_max = 2500
         self.celerity = self.celerity_min
-        self.celerity_variation_time = 300
+        self.celerity_variation_time = 240
+
+        self.bounce_plage = (95, 105)
 
         # contrainte de déplacement
         self.x_extremum = None
@@ -74,8 +76,9 @@ class Ball:
         """affichage"""
         # trainée
         for i, pos in enumerate(self.trail):
-            color = tuple(self.color[j] + (pm.states["game"].surface_color[j] - self.color[j]) * min(max(1 - (i + 1) / (self.trail_limit + 1), 0), 1) for j in range(3))
-            pygame.draw.circle(pm.states["game"].surface, color, tuple(map(int, pos)), self.radius)
+            advancement = min(max((i + 1) / (len(self.trail) + 2), 0), 1)
+            color = tuple(self.color[j] + (pm.states["game"].surface_color[j] - self.color[j]) * (1 - advancement) for j in range(3))
+            pygame.draw.circle(pm.states["game"].surface, color, tuple(map(int, pos)), self.radius * advancement**0.75)
         
         # balle
         pygame.draw.circle(pm.states["game"].surface, self.color, (int(self.x), int(self.y)), self.radius)
@@ -91,6 +94,7 @@ class Ball:
         """
         self.d.x *= dx
         self.d.y *= dy
+        self.d.normalize()
         
     def check_collide(self, rect: pygame.Rect):
         """
@@ -109,8 +113,8 @@ class Ball:
         closest_y = min(max(self.y, rect.top), rect.bottom)
         distance = self.get_distance(closest_x, closest_y)
         
-        if distance <= self.radius:  
-            self.bounce(-1, 1)
+        if distance <= self.radius:
+            self.bounce(-random.randint(*self.bounce_plage) / 100, random.randint(*self.bounce_plage) / 100)
             self.disabled_side = side
         else:
             edge = rect.right + self.radius if side == "left" else rect.left - self.radius
@@ -126,7 +130,7 @@ class Ball:
         Vérifie la collision avec les murs
         """
         if self.y - self.radius <= 0 or self.y + self.radius >= pm.states["game"].surface_height:
-            self.bounce(1, -1)
+            self.bounce(random.randint(*self.bounce_plage) / 100, -random.randint(*self.bounce_plage) / 100)
             self.y = max(self.radius, min(self.y, pm.states["game"].surface_height - self.radius))
 
     def check_goal(self):
@@ -143,7 +147,7 @@ class Ball:
         if self.x - self.radius <= 0:
            return max(1, pm.states["game"].score)
         if self.x + self.radius >= pm.states["game"].surface_width and side != self.disabled_side:
-            self.bounce(-1, 1)
+            self.bounce(-random.randint(*self.bounce_plage) / 100, random.randint(*self.bounce_plage) / 100)
             self.disabled_side = side
             pm.states["game"].score += 1
         return 0
