@@ -9,11 +9,6 @@ class Ball:
     Balle
     """
     def __init__(self, radius: int=20, color: tuple[int]=(255, 255, 255)):
-        # position initiale
-        self.disabled_side = random.choice(("left", "right")) if pm.states["game"].game_mode != 1 else "right"
-        self.start_angle = (random.randint(15, 35) if self.disabled_side == "left" else random.randint(145, 165)) * random.choice((-1, 1))
-        self.start_angle_radians = math.radians(self.start_angle)
-
         # design
         self.color = color
         self.trail = []
@@ -25,15 +20,19 @@ class Ball:
         # position
         self.x = float(pm.states["game"].surface_width / 2)
         self.y = float(pm.states["game"].surface_height / 2)
-        self.d = pm.geometry.Vector(*self.vect_from_angle(self.start_angle_radians))
+
+        # angle
+        self.disabled_side = random.choice(("left", "right")) if pm.states["game"].game_mode != 1 else "right"
+        self.angle = (random.randint(15, 35) if self.disabled_side == "left" else random.randint(145, 165)) * random.choice((-1, 1))
+        self.angle_epsilon = math.radians(5) # bruit dans le rebond
+        self.angle_min = 15
+        self.angle_max = 35
 
         # paramètres
         self.celerity_min = 700
         self.celerity_max = 2500
         self.celerity = self.celerity_min
         self.celerity_variation_time = 240
-
-        self.bounce_plage = (95, 105)
 
         # contrainte de déplacement
         self.x_extremum = None
@@ -54,8 +53,8 @@ class Ball:
 
         # déplacement
         celerity = pm.time.scale_value(self.celerity)
-        self.x += self.d.x * celerity
-        self.y += self.d.y * celerity
+        self.x += self.dx * celerity
+        self.y += self.dy * celerity
 
         # contrainte horizontale
         if self.x_extremum:
@@ -68,9 +67,7 @@ class Ball:
         self.check_border()
 
         # atteinte du côté d'un des deux joueurs
-        goal = self.check_goal()
-        if goal != 0:
-            return goal
+        return self.check_sides()
     
     def draw(self):
         """affichage"""
@@ -84,19 +81,33 @@ class Ball:
         pygame.draw.circle(pm.states["game"].surface, self.color, (int(self.x), int(self.y)), self.radius)
         pygame.draw.circle(pm.states["game"].surface, (0, 0, 0), (int(self.x), int(self.y)), self.radius, 1)
 
-    def bounce(self, dx: float=0, dy: float=0):
+    @property
+    def dx(self):
+        """Renvoie la composante x du vecteur déplacement"""
+        return math.cos(self.angle)
+    
+    @property
+    def dy(self):
+        """Renvoie la composante y du vecteur déplacement"""
+        return -math.sin(self.angle)
+    
+    def get_vect(self):
+        """Renvoie le vecteur déplacement"""
+        return pm.geometry.Vector(self.dx, self.dy)
+
+    def bounce(self, normal_angle: int|float):
         """
-        Modifie le déplacement de la balle
+        Fait rebondir la balle
 
         Args:
-            dx (float) : facteur dx
-            dy (float) : facteur dy
+            normal_angle (int|float) : angle du vect normal extérieur (radians)
         """
-        self.d.x *= dx
-        self.d.y *= dy
-        self.d.normalize()
+        self.angle = 2 * normal_angle - self.angle                                                                  # réflexion mirroir
+        self.angle += random.uniform(-self.angle_epsilon, self.angle_epsilon)                                       # bruit
+        self.angle = (self.angle + math.pi) % (2 * math.pi) - math.pi                                               # normalisation
+        self.angle = (self.angle / abs(self.angle)) * min(max(abs(self.angle), self.angle_min), self.angle_max)     # clamp
         
-    def check_collide(self, rect: pygame.Rect):
+    def colliderect(self, rect: pygame.Rect):
         """
         Vérifie la collision avec une raquette
 
@@ -105,17 +116,22 @@ class Ball:
         """
         side = "left" if rect.centerx < pm.states["game"].surface_width / 2 else "right"
         if side == self.disabled_side:
+            # wall game
             if pm.states["game"].game_mode == 1:
                 self.x_extremum = None
             return
         
-        closest_x = min(max(self.x, rect.left), rect.right)
-        closest_y = min(max(self.y, rect.top), rect.bottom)
-        distance = self.get_distance(closest_x, closest_y)
+        closest_x = min(max(self.x, rect.left), rect.right) # coordonnée x du rectangle la plus proche du centre
+        closest_y = min(max(self.y, rect.top), rect.bottom) # coordonnée y du rectangle la plus proche du centre
+        distance = self.get_distance(closest_x, closest_y)  # distance entre le rectangle et le centre du cercle
         
-        if distance <= self.radius:
-            self.bounce(-random.randint(*self.bounce_plage) / 100, random.randint(*self.bounce_plage) / 100)
+        # rebond
+        if distance <= self.radius: # si dans le cercle
+            normal_vect = pm.geometry.Vector(self.x, self.y) - pm.geometry.Vector(closest_x, closest_y) # angle du vecteur normal à la raquette
+            self.bounce(math.atan2(-normal_vect.y, normal_vect.x))
             self.disabled_side = side
+        
+        # pas de rebond
         else:
             edge = rect.right + self.radius if side == "left" else rect.left - self.radius
             inter_y = self.y + self.d.y * (edge - self.x) / self.d.x
@@ -125,7 +141,7 @@ class Ball:
             else:
                 self.x_extremum = None
 
-    def check_border(self):
+    def collidewalls(self):
         """
         Vérifie la collision avec les murs
         """
@@ -133,13 +149,20 @@ class Ball:
             self.bounce(random.randint(*self.bounce_plage) / 100, -random.randint(*self.bounce_plage) / 100)
             self.y = max(self.radius, min(self.y, pm.states["game"].surface_height - self.radius))
 
-    def check_goal(self):
+    def collidesides(self):
         """
         Vérifie si la balle a atteint une extremité
         """
-        return getattr(self, f"check_goal_{pm.states['game'].game_mode}", self.check_goal_2)()
+        if pm.states["game"].game_mode == 1:    # wall game
+            return self.collidesides_wallgame()
+
+        if self.x - self.radius <= 0:
+            return 2
+        elif self.x + self.radius >= pm.states["game"].surface_width:
+            return 1
+        return 0
     
-    def check_goal_1(self):
+    def collidesides_wallgame(self):
         """
         Vérifie si la balle a atteint une extremité (wall game)
         """
@@ -151,25 +174,8 @@ class Ball:
             self.disabled_side = side
             pm.states["game"].score += 1
         return 0
-
-    def check_goal_2(self):
-        """
-        Vérifie si la balle a atteint une extremité (Joueur contre Joueur)
-        """
-        if self.x - self.radius <= 0:
-            return 2
-        elif self.x + self.radius >= pm.states["game"].surface_width:
-            return 1
-        return 0
     
-    @property
-    def angle(self) -> float:
-        """
-        Renvoie l'angle entre le vecteur déplacement et le vecteur (1, 0)
-        """
-        return math.atan2(-self.d.y, self.d.x)
-    
-    def get_distance(self, x: int|float, y: int|float) -> float:
+    def distance(self, x: int|float, y: int|float) -> float:
         """
         Renvoie la distance entre le centre de la balle et la point
 
@@ -178,14 +184,3 @@ class Ball:
             y (int, float) : coordonnée y du point
         """
         return math.sqrt((self.x - x)**2 + (self.y - y)**2)
-    
-    def vect_from_angle(self, angle: int|float) -> tuple[float, float]:
-        """
-        Renvoie le vecteur normalisé pour un angle donné
-
-        Args:
-            angle (int, float) : angle entre le vecteur (1, 0) et le vecteur renvoyé
-        """
-        dx = math.cos(angle)
-        dy = -math.sin(angle)
-        return (dx, dy)

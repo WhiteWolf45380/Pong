@@ -10,7 +10,7 @@ class Game(pm.states.State):
     """
     def __init__(self, width: int=1440, height: int=1080):
         super().__init__('game')
-        self.game_mode = 1
+        self.game_mode = 2
 
         # surface de jeu
         self.surface_width = width
@@ -43,9 +43,7 @@ class Game(pm.states.State):
         self.score = 0
 
     def init(self):
-        """
-       Initialisation d'une partie
-        """
+        """Initialisation d'une partie"""
         # balle
         self.ball = Ball()
 
@@ -59,9 +57,7 @@ class Game(pm.states.State):
         return self
 
     def update(self):
-        """
-        Actualisation de la frame
-        """
+        """Actualisation de la frame"""
         # jeu en pause
         if self.game_frozen:
             self.draw()

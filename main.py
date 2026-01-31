@@ -1,5 +1,7 @@
 import pygame
 import pygame_manager as pm # package personnel pour pygame
+from _selection import Selection
+from _modifiers import Modifiers
 from _game import Game
 
 class Main:
@@ -8,9 +10,11 @@ class Main:
     """
     def __init__(self):
         pm.init()
-        pm.time.set_fps_limit(100)
-        pm.screen.set_vsync(True)
+
+        self.selection = Selection().init()
+        self.modifiers = Modifiers().init()
         self.game = Game().init()
+
         self.game.activate()
 
     def update(self):

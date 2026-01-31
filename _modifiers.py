@@ -2,12 +2,12 @@ import pygame
 import pygame_manager as pm
 
 
-class GameModifiers(pm.states.State):
+class Modifiers(pm.states.State):
     """
     Menu de modification des paramètres de la partie
     """
     def __init__(self, width: int=1920, height: int=1080):
-        super().__init__('game_modifiers')
+        super().__init__('modifiers')
 
         # surface
         self.surface_width = width
@@ -27,3 +27,9 @@ class GameModifiers(pm.states.State):
             "player_1_side": "left",
         }
         pm.settings.create("ball_radius", 20)
+    
+    def init(self):
+        """Chargement de l'état"""
+
+    def update(self):
+        """Actualisation par frame"""
