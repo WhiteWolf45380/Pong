@@ -1,5 +1,5 @@
 # ======================================== IMPORTS ========================================
-import pygame_manager as pm
+from ..._core import pm
 
 # ======================================== ETAT ========================================
 class MainMenuState(pm.states.State):

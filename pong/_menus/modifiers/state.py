@@ -1,8 +1,8 @@
 # ======================================== IMPORTS ========================================
-import pygame_manager as pm
+from ..._core import pm
 
 # ======================================== ETAT ========================================
-class ModifiersMenuState(pm.states.State):
+class Modifiers(pm.states.State):
     """
     Modification des paramètres de la partie
     """

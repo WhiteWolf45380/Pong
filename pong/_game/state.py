@@ -52,16 +52,3 @@ class Game(pm.states.State):
         # jeu en pause
         if self.game_frozen:
             return
-
-    def end(self, result: int=0):
-        """
-        Fin de partie
-
-        Args:
-            winner (int) : le gagnant
-        """
-        if self.game_mode == 1:
-            print(f"Score : {result}")
-        else:
-            print(f"Le gagnant est le joueur {result}")
-        pm.stop()

@@ -1,8 +1,8 @@
 # ======================================== IMPORTS ========================================
-import pygame_manager as pm
+from ..._core import pm
 
 # ======================================== ETAT ========================================
-class ModesMenuState(pm.states.State):
+class Modes(pm.states.State):
     """
     Modification du mode de jeu
     """

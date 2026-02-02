@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pong"
+version = "0.0.1"
+description = "Jeu Pong revisité"
+authors = [{ name = "WhiteWolf45380" }]
+dependencies = [
+    "pygame",
+    "pygame_manager @ https://github.com/WhiteWolf45380/Pygame-Manager/archive/refs/heads/main.zip"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pong*"]
+
+[tool.setuptools.package-data]
+"pong" = ["_assets/**/*"]
