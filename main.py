@@ -1,21 +1,23 @@
-import pygame
-import pygame_manager as pm # package personnel pour pygame
-from _selection import Selection
-from _modifiers import Modifiers
-from _game import Game
 
+# ======================================== IMPORTS ========================================
+import pygame_manager as pm
+from .selection.state import GameModeState
+from .modifiers_menu.state import GameModifiersState
+from .game.state import GameState
+
+# ======================================== CLASSE PRINCIPALE ========================================
 class Main:
     """
     Jeu entier
     """
     def __init__(self):
+        # Initialisation du framework modulable
         pm.init()
 
-        self.selection = Selection().init()
-        self.modifiers = Modifiers().init()
-        self.game = Game().init()
-
-        self.game.activate()
+        # Instanciation des états
+        self.selection = GameModeState().init()
+        self.modifiers = GameModifiersSate().init()
+        self.game = GameState().init()
 
     def update(self):
         """
@@ -23,6 +25,7 @@ class Main:
         """
         pm.screen.fill((80, 80, 90))
 
+# ======================================== INSTANCE PRINCIPALE ========================================
 if __name__ == '__main__':
     main = Main()
     pm.run(main.update)

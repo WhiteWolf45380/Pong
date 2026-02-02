@@ -1,19 +1,13 @@
-import pygame
+# ======================================== IMPORTS ========================================
 import pygame_manager as pm
 
-
-class Modifiers(pm.states.State):
+# ======================================== ETAT ========================================
+class ModifiersMenuState(pm.states.State):
     """
-    Menu de modification des paramètres de la partie
+    Modification des paramètres de la partie
     """
-    def __init__(self, width: int=1920, height: int=1080):
-        super().__init__('modifiers')
-
-        # surface
-        self.surface_width = width
-        self.surface_height = height
-        self.surface = pygame.Surface((self.surface_with, self.surface_height))
-        self.surface_rect = self.surface.get_rect()
+    def __init__(self):
+        super().__init__('modifiers_menu')
 
         # modifiers
         self.modifiers_init = {
@@ -26,7 +20,6 @@ class Modifiers(pm.states.State):
             "paddle_celerity": 500,
             "player_1_side": "left",
         }
-        pm.settings.create("ball_radius", 20)
     
     def init(self):
         """Chargement de l'état"""
