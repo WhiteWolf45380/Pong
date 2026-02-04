@@ -1,25 +1,28 @@
 # ======================================== IMPORTS ========================================
-from ..._core import pm, pygame
+from ..._core import ctx, pm, pygame
 import math
 import random
 
 # ======================================== OBJET ========================================
-class Ball:
+class Ball(pm.entities.CircleEntity):
     """
     Balle
     """
-    def __init__(self, radius: int=20, color: tuple[int]=(255, 255, 255)):
-        # design
-        self.color = color
+    def __init__(self, view: pm.panels.Panel): # type: ignore
+        # Init de la super-classe
+        super().__init__(0, 0, ctx.modifers.radius, zorder=0, panel="game_view")
+        self.view = view
+
+        # Desin        
+        self.color = ctx.modifiers.ball_color
         self.trail = []
         self.trail_limit = 8
 
         # taille
-        self.radius = radius
+        self.radius = ctx.modifiers.ball_radius
 
         # position
-        self.x = float(pm.states["game"].surface_width / 2)
-        self.y = float(pm.states["game"].surface_height / 2)
+        self.center = view.center
 
         # angle
         self.disabled_side = random.choice(("left", "right")) if pm.states["game"].game_mode != 1 else "right"
@@ -35,8 +38,8 @@ class Ball:
         self.celerity_variation_time = 240
 
         # contrainte de déplacement
-        self.x_extremum = None
-        self.y_at_extremum = 0
+        self.centerx_extremum = None
+        self.centery_at_extremum = 0
 
     # ======================================== ACTUALISATION ========================================
     def update(self) -> None | int:
@@ -44,7 +47,7 @@ class Ball:
         Actualisation de la frame
         """
         # trainée
-        self.trail.append((self.x, self.y))
+        self.trail.append((self.centerx, self.centery))
         while len(self.trail) > int(self.trail_limit * (pm.time.smoothfps / 60)):
             self.trail.pop(0)
 
@@ -53,33 +56,29 @@ class Ball:
 
         # déplacement
         celerity = pm.time.scale_value(self.celerity)
-        self.x += self.dx * celerity
-        self.y += self.dy * celerity
+        self.centerx += self.dx * celerity
+        self.centery += self.dy * celerity
 
         # contrainte horizontale
-        if self.x_extremum:
-            self.x = min(self.x, self.x_extremum) if self.disabled_side == "left" else max(self.x, self.x_extremum)
-            if self.x == self.x_extremum:
-                self.y = self.y_at_extremum
+        if self.centerx_extremum:
+            self.centerx = min(self.centerx, self.centerx_extremum) if self.disabled_side == "left" else max(self.centerx, self.centerx_extremum)
+            if self.centerx == self.centerx_extremum:
+                self.centery = self.centery_at_extremum
         
         # contrainte verticale
-        self.y = min(max(self.y, self.radius), pm.states["game"].surface_height - self.radius)
+        self.centery = min(max(self.centery, self.radius), pm.states["game"].surface_height - self.radius)
         self.check_border()
 
         # atteinte du côté d'un des deux joueurs
         return self.check_sides()
     
-    def draw(self):
+    def draw_behind(self):
         """affichage"""
         # trainée
         for i, pos in enumerate(self.trail):
             advancement = min(max((i + 1) / (len(self.trail) + 2), 0), 1)
             color = tuple(self.color[j] + (pm.states["game"].surface_color[j] - self.color[j]) * (1 - advancement) for j in range(3))
             pygame.draw.circle(pm.states["game"].surface, color, tuple(map(int, pos)), self.radius * advancement**0.75)
-        
-        # balle
-        pygame.draw.circle(pm.states["game"].surface, self.color, (int(self.x), int(self.y)), self.radius)
-        pygame.draw.circle(pm.states["game"].surface, (0, 0, 0), (int(self.x), int(self.y)), self.radius, 1)
 
     # ======================================== GETTERS ========================================
     @property
@@ -120,36 +119,36 @@ class Ball:
         if side == self.disabled_side:
             # wall game
             if pm.states["game"].game_mode == 1:
-                self.x_extremum = None
+                self.centerx_extremum = None
             return
         
-        closest_x = min(max(self.x, rect.left), rect.right) # coordonnée x du rectangle la plus proche du centre
-        closest_y = min(max(self.y, rect.top), rect.bottom) # coordonnée y du rectangle la plus proche du centre
+        closest_x = min(max(self.centerx, rect.left), rect.right) # coordonnée x du rectangle la plus proche du centre
+        closest_y = min(max(self.centery, rect.top), rect.bottom) # coordonnée y du rectangle la plus proche du centre
         distance = self.get_distance(closest_x, closest_y)  # distance entre le rectangle et le centre du cercle
         
         # rebond
         if distance <= self.radius: # si dans le cercle
-            normal_vect = pm.geometry.Vector(self.x, self.y) - pm.geometry.Vector(closest_x, closest_y) # angle du vecteur normal à la raquette
+            normal_vect = pm.geometry.Vector(self.centerx, self.centery) - pm.geometry.Vector(closest_x, closest_y) # angle du vecteur normal à la raquette
             self.bounce(math.atan2(-normal_vect.y, normal_vect.x))
             self.disabled_side = side
         
         # pas de rebond
         else:
             edge = rect.right + self.radius if side == "left" else rect.left - self.radius
-            inter_y = self.y + self.d.y * (edge - self.x) / self.d.x
+            inter_y = self.centery + self.d.y * (edge - self.centerx) / self.d.x
             if rect.top <= inter_y <= rect.bottom:
-                self.x_extremum = edge
-                self.y_at_extremum = inter_y
+                self.centerx_extremum = edge
+                self.centery_at_extremum = inter_y
             else:
-                self.x_extremum = None
+                self.centerx_extremum = None
 
     def collidewalls(self):
         """
         Vérifie la collision avec les murs
         """
-        if self.y - self.radius <= 0 or self.y + self.radius >= pm.states["game"].surface_height:
+        if self.centery - self.radius <= 0 or self.centery + self.radius >= pm.states["game"].surface_height:
             self.bounce(random.randint(*self.bounce_plage) / 100, -random.randint(*self.bounce_plage) / 100)
-            self.y = max(self.radius, min(self.y, pm.states["game"].surface_height - self.radius))
+            self.centery = max(self.radius, min(self.centery, pm.states["game"].surface_height - self.radius))
 
     def collidesides(self):
         """
@@ -158,9 +157,9 @@ class Ball:
         if pm.states["game"].game_mode == 1:    # wall game
             return self.collidesides_wallgame()
 
-        if self.x - self.radius <= 0:
+        if self.centerx - self.radius <= 0:
             return 2
-        elif self.x + self.radius >= pm.states["game"].surface_width:
+        elif self.centerx + self.radius >= pm.states["game"].surface_width:
             return 1
         return 0
     
@@ -168,10 +167,10 @@ class Ball:
         """
         Vérifie si la balle a atteint une extremité (wall game)
         """
-        side = "left" if self.x < pm.states["game"].surface_width / 2 else "right"
-        if self.x - self.radius <= 0:
+        side = "left" if self.centerx < pm.states["game"].surface_width / 2 else "right"
+        if self.centerx - self.radius <= 0:
            return max(1, pm.states["game"].score)
-        if self.x + self.radius >= pm.states["game"].surface_width and side != self.disabled_side:
+        if self.centerx + self.radius >= pm.states["game"].surface_width and side != self.disabled_side:
             self.bounce(-random.randint(*self.bounce_plage) / 100, random.randint(*self.bounce_plage) / 100)
             self.disabled_side = side
             pm.states["game"].score += 1
@@ -185,4 +184,4 @@ class Ball:
             x (int, float) : coordonnée x du point
             y (int, float) : coordonnée y du point
         """
-        return math.sqrt((self.x - x)**2 + (self.y - y)**2)
+        return math.sqrt((self.centerx - x)**2 + (self.centery - y)**2)

@@ -1,7 +1,5 @@
 # ======================================== IMPORTS ========================================
 from . import ctx, pm
-from .._menus import Main, Modes, Modifiers
-from .._game import Game
 
 # ======================================== CLASSE PRINCIPALE ========================================
 class Engine:
@@ -11,6 +9,10 @@ class Engine:
     def __init__(self):
         # Initialisation du framework modulable
         pm.init()
+
+        # Imports
+        from .._menus import Main, Modes, Modifiers
+        from .._game import Game
 
         # Instanciation du jeu
         self.game = Game().init()

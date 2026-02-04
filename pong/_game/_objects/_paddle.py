@@ -6,6 +6,7 @@ class Paddle:
     """
     Raquette d'une joueur
     """
+    OFFSET = 50
     def __init__(self, x: int=0, y: int=0, width: int=20, height: int=160, color: tuple[int]=(255, 255, 255), up: int=None, down: int=None):
         # design
         self.color = color

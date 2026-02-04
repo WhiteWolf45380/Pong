@@ -18,47 +18,36 @@ class Game(pm.states.State):
 
         # Modes de jeu
         self.modes = {}
-        self.modes["wall_game"] = WallGame()
-        self.modes["solo"] = Solo()
-        self.modes["local"] = Local()
+        self.modes["wall_game"] = WallGame
+        self.modes["solo"] = Solo
+        self.modes["local"] = Local
 
-        # temporaire
-        self.game_mode = 2
+        # Partie en cours
+        self.current = None
 
-        # lancement de la partie
+        # pause
         self.game_frozen = True
         def toggle_freeze(self):
             self.game_frozen = not self.game_frozen
         pm.inputs.add_listener(pygame.K_SPACE, toggle_freeze, args=[self])
 
-        # objets
-        self.ball = None    # balle
-        self.paddles = []   # raquettes
-
-        # wall game
-        self.score = 0
-
     # ======================================== CHARGEMENT ========================================
     def init(self):
         """Initialisation d'une partie"""
-        # balle
-        self.ball = Ball()
-
-        # raquettes
-        offset = 50
-        self.paddles.append(Paddle(offset, self.surface_rect.height / 2, up=pygame.K_z, down=pygame.K_s))
-        if self.game_mode == 2:
-            self.paddles.append(Paddle(self.surface_rect.width - offset, self.surface_rect.height / 2, up=pygame.K_UP, down=pygame.K_DOWN))
-        
-        pm.states.activate("game") 
+        pm.states.activate("game")
+        self.current = self.modes[ctx.modes.selected](self.view)
         return self
 
     # ======================================== ACTUALISATION ========================================
     def update(self):
         """Actualisation de la frame"""
-        # jeu en pause
+        # Jeu en pause
         if self.game_frozen:
             return
+        
+        # Jeu en cours
+        if self.current is not None:
+            self.current.update()
         
     # ======================================== GETTERS ========================================
     @property
