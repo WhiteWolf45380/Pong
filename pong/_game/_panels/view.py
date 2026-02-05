@@ -14,5 +14,4 @@ class GameView(pm.panels.Panel):
 
     def draw(self, surface: pygame.Surface):
         """Dessin par frame"""
-        print("ok")
         surface.fill(self.background_color)

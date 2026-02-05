@@ -1,4 +1,5 @@
 # ======================================== IMPORTS ========================================
+from __future__ import annotations
 from ..._core import ctx, pm, pygame, TYPE_CHECKING
 import math
 import random
@@ -19,7 +20,7 @@ class Ball(pm.entities.CircleEntity):
         self.properties = ctx.modifiers.get_by_category("ball", remove_prefix=True)
 
         # Init de la super-classe
-        super().__init__(self.view.center, self.ball_radius, zorder=0, panel="game_view")
+        super().__init__(self.view.center, self["radius"], zorder=0, panel="game_view")
 
         # Traînée        
         self.trail = []
@@ -79,11 +80,11 @@ class Ball(pm.entities.CircleEntity):
             pygame.draw.circle(surface, color, tuple(map(int, pos)), self.radius * advancement**0.75)
 
     # ======================================== GETTERS ========================================
-    def __getattr__(self, name: str):
+    def __getitem__(self, name: str):
         """Proxy vers les propriétés"""
         if name in self.properties:
             return self.properties[name]
-        return super().__getattr__(name)
+        raise AttributeError(name)
 
     @property
     def dx(self):

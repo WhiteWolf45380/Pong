@@ -21,7 +21,7 @@ class Solo(pm.states.State):
         self.winner = None
     
     # ======================================== LANCEMENT ========================================
-    def init(self):
+    def on_enter(self):
         """Lancement d'une partie"""
         # Balle
         self.ball = Ball()

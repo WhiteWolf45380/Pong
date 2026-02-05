@@ -20,8 +20,9 @@ class WallGame(pm.states.State):
 
         # Paramètres dynamiques
         self.score = 0
-        
-    def init(self):
+    
+    # ======================================== LANCEMENT ========================================
+    def on_enter(self):
         """Lancement d'une partie"""
         # Balle
         self.ball = Ball()

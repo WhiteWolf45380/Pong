@@ -31,9 +31,8 @@ class Game(pm.states.State):
         pm.inputs.add_listener(pygame.K_SPACE, toggle_freeze, args=[self])
 
     # ======================================== CHARGEMENT ========================================
-    def init(self):
+    def on_enter(self):
         """Initialisation d'une partie"""
-        pm.states.activate("game")
         self.current = self.modes[ctx.modes.selected]
         pm.states.activate(ctx.modes.selected)
         return self

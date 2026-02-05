@@ -29,6 +29,7 @@ class Modifiers(pm.states.State):
 
         # Catégorie: Paddle
         self.add("size", 100, category="paddle", add_prefix=True)                                       # (int)  : hauteur de la raquette
+        self.add("border_radius", 10, category="paddle", add_prefix=True)                               # (int)  : arrondi des coins de la raquette
         self.add("color", (255, 255, 255), category="paddle", add_prefix=True)                          # (color): couleur de la raquette
         self.add("celerity", 500, category="paddle", add_prefix=True)                                   # (int)  : vitesse de la raquette
         self.add("side", 0, category="paddle", modes=['wall_game', 'solo'], add_prefix=True)            # (int)  : côté de la raquette

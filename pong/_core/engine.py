@@ -29,7 +29,7 @@ class Engine:
         ctx.modifiers = self.modifiers
         
         # Lancement d'une partie
-        self.game.init()
+        pm.states.activate("game")
 
     def update(self):
         """Actualisation de la frame"""

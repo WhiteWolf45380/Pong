@@ -3,7 +3,7 @@ from ..._core import ctx, pm, pygame
 from .._objects import Ball, Paddle
 
 # ======================================== MODE DE JEU ========================================
-class Local(pm.states.Sate):
+class Local(pm.states.State):
     """Mode de jeu : 2 Joueurs"""
     def __init__(self):
         # Initialisation de l'état
@@ -21,7 +21,7 @@ class Local(pm.states.Sate):
         self.winner = None
 
     # ======================================== LANCEMENT ========================================
-    def init(self):
+    def on_enter(self):
         """Lancement d'une partie"""
         # Balle
         self.ball = Ball()

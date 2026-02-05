@@ -15,9 +15,7 @@ class Paddle(pm.entities.RectEntity):
         self.properties = ctx.modifiers.get_by_category("paddle", remove_prefix=True)
 
         # Initialisation de l'entité
-        super().__init__(0, 0, self.width, self.height, self.border_radius, 1, self.view)
-
-        # Position
+        super().__init__(0, 0, 0.33 * self["size"], self["size"], self["border_radius"], 1, self.view)
         self.center = (x, y)
 
         # Déplacement
@@ -31,32 +29,23 @@ class Paddle(pm.entities.RectEntity):
 
     # ======================================== ACTUALISATION ========================================
     def update(self):
-        """
-        Actualisation de la frame
-        """
-        self.rect.center = (self.x, self.y)
+        """Actualisation de la frame"""
 
     def draw(self):
         """Affichage"""
-        pygame.draw.rect(pm.states["game"].surface, self.color, self.rect, border_radius=self.border_radius)
-        pygame.draw.rect(pm.states["game"].surface, (0, 0, 0), self.rect, 1, border_radius=self.border_radius)
-
-    # ======================================== PREDICATS ========================================
-    def is_playing(self):
-        """
-        Prédicat de l'état actif du jeu
-        """
-        return self.main.current_state
     
     # ======================================== METHODES DYNAMIQUES ========================================
     def move_up(self):
-        """
-        Se dirige vers le haut
-        """
-        self.y = max(self.height / 2, self.y - pm.time.scale_value(self.celerity))
+        """Se dirige vers le haut"""
+        super().move_up(pm.time.scale_value(self.celerity), min=(0.5 * self.height))
     
     def move_down(self):
-        """
-        Se dirige vers le bas
-        """
-        self.y = min(pm.states["game"].surface_height - self.height / 2, self.y + pm.time.scale_value(self.celerity))
+        """Se dirige vers le bas"""
+        super().move_down(pm.time.scale_value(self.celerity), max=(self.view.height - 0.5 * self.height))
+
+    # ======================================== GETTERS ========================================
+    def __getitem__(self, name: str):
+        """Proxy vers les propriétés"""
+        if name in self.properties:
+            return self.properties[name]
+        raise AttributeError(name)
