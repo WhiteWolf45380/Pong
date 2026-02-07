@@ -193,7 +193,6 @@ class Ball(pm.entities.CircleEntity):
             if intersections:
                 I = min(intersections, key=lambda P: p0.distance(P))
                 normal: pm.types.VectorObject = pm.geometry.Circle(I, self.radius).rect_collision_normal(paddle.rect)
-                print(normal)
                 self.bounce(normal)
                 paddle.collision()
     

@@ -33,7 +33,7 @@ class Game(pm.states.State):
         """Initialisation d'une partie"""
         super().on_enter()
         self.current = self.modes[ctx.modes.selected]
-        pm.states.activate(ctx.modes.selected)
+        pm.states.activate(ctx.modes.selected, transition=False)
         self.toggle_freeze()
         return self
 

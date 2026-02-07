@@ -24,12 +24,21 @@ class MainMenuView(pm.panels.Panel):
             gradient_color=(255, 0, 255),
             gradient_direction="diagonal",
             gradient_fluctuation=True,
-            gradient_fluctuation_speed=1.5,
+            gradient_fluctuation_speed=2.0,
             gradient_fluctuation_amplitude=0.5,
             anchor="center",
             panel="main_menu_view"
             )
+        
+        # Voile assombrissant
+        self.dark_curtain = pygame.Surface((width, height))
+        self.dark_curtain.fill(self.background_color)
+        self.dark_curtain.set_alpha(200)
 
     def draw_back(self, surface: pygame.Surface):
         """Dessin par frame"""
         surface.fill(self.background_color)
+    
+    def draw_between(self, surface: pygame.Surface):
+        """Dessin entre les entités et l'ui"""
+        surface.blit(self.dark_curtain, (0, 0))

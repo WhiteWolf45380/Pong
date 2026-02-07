@@ -1,6 +1,7 @@
 # ======================================== IMPORTS ========================================
 from ..._core import pm
 from ._panels import MainMenuView
+from ._objects import BallObject
 
 # ======================================== ETAT ========================================
 class Main(pm.states.State):
@@ -35,7 +36,7 @@ class Main(pm.states.State):
                 height=buttons_height,
                 anchor="midtop",
                 filling=True,
-                filling_color=(255, 255, 255, 10),
+                filling_color=(10, 10, 25, 255),
                 text=pm.languages(f"main_{button}"),
                 font_color=(255, 255, 255),
                 font_color_hover=(240, 200, 0),
@@ -48,6 +49,9 @@ class Main(pm.states.State):
                 callback=getattr(self, f"handle_{button}", lambda: None),
                 panel="main_menu_view",
             )
+    
+        self.balls_n = 15
+        self.balls = [BallObject() for _ in range(self.balls_n)]
     
     # ======================================== ACTUALISATION ========================================
     def update(self):

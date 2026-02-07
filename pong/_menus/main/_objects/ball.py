@@ -5,23 +5,24 @@ import math
 import random
 
 # ======================================== OBJET ========================================
-class Ball(pm.entities.CircleEntity):
+class BallObject(pm.entities.CircleEntity):
     """
     Balle
     """
-    def __init__(self, check_end: callable):
+    def __init__(self):
         # Panel de vue
         self.view = pm.panels["main_menu_view"]
 
         # Paramètres
-        radius = 20
+        radius = 15
         x = random.randint(int(self.view.width * 0.1), int(self.view.width * 0.9))
         y = random.randint(int(self.view.height * 0.1), int(self.view.height * 0.9))
 
         # Init de la super-classe
-        super().__init__(self.view.center, radius, zorder=1, panel=str(self.view))
+        super().__init__((x, y), radius, zorder=1, panel=str(self.view))
 
         # Propriétés
+        self.color = (255, 255, 255)
         self.border = True
         self.border_width = 2
         self.border_color = (120, 120, 120)
@@ -32,7 +33,9 @@ class Ball(pm.entities.CircleEntity):
         self.trail_limit = 8
 
         # Angle
-        self.angle = math.radians(random.randint(-180, 180))
+        self.angle_min = math.radians(20)
+        self.angle_max = math.radians(50)
+        self.angle = (random.uniform(self.angle_min, self.angle_max) + random.choice([0, math.pi / 2])) * random.choice([-1, 1])
         self.bouncing_epsilon = math.radians(10)
 
         # Déplacement
@@ -45,12 +48,13 @@ class Ball(pm.entities.CircleEntity):
         """
         # Trainée
         self.trail.append((self.centerx, self.centery))
-        while len(self.trail) > int(self["trail_length"] * (pm.time.smoothfps / 60)):
+        while len(self.trail) > int(self.trail_limit * (pm.time.smoothfps / 60)):
             self.trail.pop(0)
 
         # Déplacement
-        self.centerx += self.dx * self.celerity
-        self.centery += self.dy * self.celerity
+        celerity = pm.time.scale_value(self.celerity)
+        self.centerx += self.dx * celerity
+        self.centery += self.dy * celerity
 
         # Collision avec les murs horizontaux
         self.collidehorizontal()
@@ -85,7 +89,7 @@ class Ball(pm.entities.CircleEntity):
                 pos_y = start_pos[1] + t * (end_pos[1] - start_pos[1])
                 
                 advancement = (i + t) / num_segments
-                color = tuple(int(self["color"][k] + (self.view.background_color[k] - self["color"][k]) * (1 - advancement))for k in range(3))
+                color = tuple(int(self.color[k] + (self.view.background_color[k] - self.color[k]) * (1 - advancement))for k in range(3))
                 radius = self.radius * advancement**0.75
                 
                 pygame.draw.circle(surface, color, (int(pos_x), int(pos_y)), max(1, int(radius)))
@@ -123,8 +127,15 @@ class Ball(pm.entities.CircleEntity):
         # Calcul du nouvel angle
         angle = math.atan2(-vector.y, vector.x)
         angle = (angle + math.pi) % (2 * math.pi) - math.pi
-        self.angle = angle + random.uniform(-self.bouncing_epsilon, self.bouncing_epsilon)
-    
+        angle += random.uniform(-self.bouncing_epsilon, self.bouncing_epsilon)
+
+        # Clamp
+        sign = 1 if angle >= 0 else -1
+        abs_angle = abs(angle)
+        if abs_angle > math.pi / 2: abs_angle = min(math.pi - self.angle_min, max(math.pi - self.angle_max, abs_angle))
+        else: abs_angle = min(self.angle_max, max(self.angle_min, abs_angle))
+        self.angle = sign * abs_angle
+
     def collidehorizontal(self):
         """Vérifie la collision avec les murs horizontaux"""
         self.centery = min(max(self.centery, self.radius), self.view.height - self.radius)

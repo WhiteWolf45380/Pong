@@ -35,7 +35,7 @@ class Engine:
         ctx.modifiers = self.modifiers
         
         # Lancement d'une partie
-        pm.states.activate("main_menu")
+        pm.states.activate("main_menu", ease_out=False, duration=1.5)
 
     def update(self):
         """Actualisation de la frame"""
